@@ -5,7 +5,11 @@ import { useState, useRef } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+
 // Assuming the file name is firebaseConfig.js
 
 // Now you can use the auth object here
@@ -18,7 +22,9 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const email = useRef(null);
   const password = useRef(null);
+  const name = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleButtonClick = () => {
     //validate the form data
     console.log(email.current.value);
@@ -34,14 +40,35 @@ const Login = () => {
       //signup form
       createUserWithEmailAndPassword(
         auth,
+
         email.current.value,
         password.current.value
       )
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
-          console.log(user);
-          navigate("/browse");
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL: "https://avatars.githubusercontent.com/u/68956838?v=4",
+          })
+            .then(() => {
+              // Profile updated!
+              const { uid, email, displayName, photoURL } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              // An error occurred
+              setErrorMessage(error.message);
+            });
+
           // ...
         })
         .catch((error) => {

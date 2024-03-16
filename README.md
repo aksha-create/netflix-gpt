@@ -12,6 +12,8 @@
 -create sign up user account
 -implemented sign in user api
 -created user slice with redux
+-implemented signout
+-updated profile
 
 # features
 
